@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+.yarn/cache
+.yarn/install-state.gz
+
+# Next.js
+.next/
+out/
+
+# Build
+dist/
+
+# Keep the public directory placeholder tracked
+!apps/web/public/.gitkeep
+
+# Env files
+.env
+.env.local
+.env.*.local
+
+# Database
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage/
+playwright-report/
+test-results/
+
+# IDE
+.idea/
+.vscode/extensions.json
+*.swp
+*.swo
