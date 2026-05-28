@@ -1,0 +1,40 @@
+generator client {
+  provider      = "prisma-client-js"
+  // Include musl + OpenSSL 3.0.x binaries for Alpine Linux (amd64 + arm64).
+  // "native" covers local dev (macOS / Linux with glibc).
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "linux-musl-arm64-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  fullName  String
+  email     String   @unique
+  password  String
+  role      String   @default("USER")
+  createdAt DateTime @default(now())
+  quotes    Quote[]
+}
+
+model Quote {
+  id                    String   @id @default(cuid())
+  userId                String
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName              String
+  email                 String
+  address               String
+  monthlyConsumptionKwh Float
+  systemSizeKw          Float
+  downPayment           Float    @default(0)
+  systemPrice           Float
+  principalAmount       Float
+  riskBand              String
+  offers                String
+  createdAt             DateTime @default(now())
+
+  @@index([userId])
+}
