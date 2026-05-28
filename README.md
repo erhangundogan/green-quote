@@ -363,12 +363,12 @@ yarn test:e2e:report
 
 1. **Refresh tokens / session revocation** — a `RefreshToken` table with rotation; the current stolen-JWT window is 7 days.
 2. **CI/CD pipeline** — GitHub Actions: `lint → typecheck → test → build → deploy to Vercel`.
-4. **Amortisation schedule view** — month-by-month breakdown (payment / principal / interest / balance) expandable on the quote detail page.
-5. **OpenAPI docs** — auto-generate from Zod schemas via `zod-to-openapi` + Swagger UI at `/api/docs`.
-6. **Rate limiting** — token-bucket on auth endpoints (register, login) to prevent brute-force.
-7. **Error boundaries + Sentry** — global React error boundary + structured error reporting for production observability.
-8. **Optimistic UI** — submit the quote form optimistically and reconcile on response.
-9. **Internationalisation** — currency and number formatting are already locale-aware (`Intl`); adding `next-intl` for string translations is a natural next step.
+3. **Amortisation schedule view** — month-by-month breakdown (payment / principal / interest / balance) expandable on the quote detail page.
+4. **OpenAPI docs** — auto-generate from Zod schemas via `zod-to-openapi` + Swagger UI at `/api/docs`.
+5. **Rate limiting** — token-bucket on auth endpoints (register, login) to prevent brute-force.
+6. **Error boundaries + Sentry** — global React error boundary + structured error reporting for production observability.
+7. **Optimistic UI** — submit the quote form optimistically and reconcile on response.
+8. **Internationalisation** — currency and number formatting are already locale-aware (`Intl`); adding `next-intl` for string translations is a natural next step.
 
 ---
 
@@ -380,11 +380,11 @@ yarn test:e2e:report
 Artifact Registry → Cloud Build (on push to main) → Cloud Run
                                                          │
                                         Cloud SQL (Postgres, private IP)
-                                        Secret Manager (JWT_SECRET)
+                                        Secret Manager (JWT_SECRET, DATABASE_URL)
 ```
 
-- **Database:** Cloud SQL for Postgres (swap Prisma provider, no app changes).
-- **Secrets:** `JWT_SECRET` and `DATABASE_URL` stored in Secret Manager, mounted as env vars.
-- **Migrations:** run `prisma migrate deploy` as a Cloud Run Job before each new revision.
+- **Database:** Cloud SQL for Postgres. The schema already uses `provider = "postgresql"` — only `DATABASE_URL` needs updating. No application code changes required.
+- **Secrets:** `JWT_SECRET` and `DATABASE_URL` stored in Secret Manager, mounted as env vars in the Cloud Run service.
+- **Migrations:** run `prisma migrate deploy` as a Cloud Run Job before each new revision (the `docker-entrypoint.sh` already does this for Docker-based deployments).
 - **Observability:** Cloud Logging ingests pino's structured JSON natively; add Cloud Trace for request tracing.
 - **CI/CD:** Cloud Build trigger on `main` — lint → test → `docker build` → push to Artifact Registry → deploy new Cloud Run revision.
