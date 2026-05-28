@@ -79,11 +79,29 @@ Solar financing pre-qualification platform. Authenticated users submit details a
 
 ---
 
+## Quick start Docker
+
+The image uses a multi-stage build (deps → builder → runner). On first start the entrypoint automatically runs `prisma migrate deploy` then seeds the database (admin + test user) if it is empty.
+
+```bash
+# 1. Set a real JWT_SECRET in docker-compose.yml (or pass via environment)
+# 2. Build and start
+docker compose up --build
+
+# App available at http://localhost:3000
+# Data persisted in Docker volume: sqlite_data
+```
+
+**Architecture (Apple Silicon):** the image is pinned to `linux/arm64` in `docker-compose.yml`. For amd64 deployment (Cloud Run, CI) change `platform` to `linux/amd64` or remove it — the `linux-musl-openssl-3.0.x` Prisma binary is included for both architectures.
+
+---
+
 ## Quick start (local dev)
 
 ```bash
 # 1. Clone and install
-git clone <repo-url> && cd cloover
+git clone https://github.com/erhangundogan/green-quote
+cd green-quote
 yarn install
 
 # 2. Configure environment
@@ -145,23 +163,6 @@ Run all scripts from the **repo root** unless noted.
 | `yarn db:migrate`        | Create/apply Prisma migrations                      |
 | `yarn db:seed`           | Seed the database (idempotent)                      |
 | `yarn db:studio`         | Open Prisma Studio UI                               |
-
----
-
-## Running with Docker
-
-The image uses a multi-stage build (deps → builder → runner). On first start the entrypoint automatically runs `prisma migrate deploy` then seeds the database (admin + test user) if it is empty.
-
-```bash
-# 1. Set a real JWT_SECRET in docker-compose.yml (or pass via environment)
-# 2. Build and start
-docker compose up --build
-
-# App available at http://localhost:3000
-# Data persisted in Docker volume: sqlite_data
-```
-
-**Architecture (Apple Silicon):** the image is pinned to `linux/arm64` in `docker-compose.yml`. For amd64 deployment (Cloud Run, CI) change `platform` to `linux/amd64` or remove it — the `linux-musl-openssl-3.0.x` Prisma binary is included for both architectures.
 
 ---
 
