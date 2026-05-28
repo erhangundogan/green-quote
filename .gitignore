@@ -42,3 +42,4 @@ test-results/
 .vscode/extensions.json
 *.swp
 *.swo
+.vercel
