@@ -2,6 +2,8 @@
 
 Solar financing pre-qualification platform. Authenticated users submit details about their residential solar installation and instantly receive a risk-banded financing quote with three installment term options (5, 10, 15 years).
 
+**Live demo:** https://green-quote-gray.vercel.app
+
 ---
 
 ## Table of contents
@@ -13,13 +15,14 @@ Solar financing pre-qualification platform. Authenticated users submit details a
 5. [Environment variables](#environment-variables)
 6. [Available scripts](#available-scripts)
 7. [Running with Docker](#running-with-docker)
-8. [Project structure](#project-structure)
-9. [Pricing model](#pricing-model)
-10. [API reference](#api-reference)
-11. [Testing](#testing)
-12. [Design decisions & trade-offs](#design-decisions--trade-offs)
-13. [What I'd add next](#what-id-add-next)
-14. [GCP deployment recommendation](#gcp-deployment-recommendation)
+8. [Deploying to Vercel](#deploying-to-vercel)
+9. [Project structure](#project-structure)
+10. [Pricing model](#pricing-model)
+11. [API reference](#api-reference)
+12. [Testing](#testing)
+13. [Design decisions & trade-offs](#design-decisions--trade-offs)
+14. [What I'd add next](#what-id-add-next)
+15. [GCP deployment recommendation](#gcp-deployment-recommendation)
 
 ---
 
@@ -32,7 +35,7 @@ Solar financing pre-qualification platform. Authenticated users submit details a
 | Styling      | Tailwind CSS + shadcn/ui                            |
 | Forms        | react-hook-form + Zod resolver                      |
 | Backend      | Next.js API routes (Node.js runtime)                |
-| Database     | SQLite via Prisma ORM                               |
+| Database     | SQLite (local dev) · PostgreSQL/Neon (production)   |
 | Auth         | JWT in `httpOnly` cookie — `jose` + `bcryptjs`      |
 | Validation   | Zod — shared schemas in `packages/shared`           |
 | Logging      | pino (structured JSON) + pino-pretty in dev         |
@@ -58,7 +61,8 @@ Solar financing pre-qualification platform. Authenticated users submit details a
 └────────────────────────┬────────────────────────────────┘
                          │ Prisma Client
 ┌────────────────────────▼────────────────────────────────┐
-│  SQLite  (prisma/dev.db)                                │
+│  SQLite (local dev · prisma/dev.db)                     │
+│  PostgreSQL/Neon (production)                           │
 │  Tables: User, Quote                                    │
 └─────────────────────────────────────────────────────────┘
 ```
@@ -166,6 +170,31 @@ Run all scripts from the **repo root** unless noted.
 
 ---
 
+## Deploying to Vercel
+
+The repo ships with a `vercel.json` that configures the monorepo build automatically.
+
+```bash
+# Install Vercel CLI and deploy
+npx vercel --prod
+```
+
+**Required environment variables in Vercel:**
+
+| Variable       | Description                                          |
+|----------------|------------------------------------------------------|
+| `DATABASE_URL` | Neon PostgreSQL connection string (pooled)           |
+| `JWT_SECRET`   | ≥ 32-char random secret (`openssl rand -base64 32`) |
+
+**Neon setup (free tier):**
+1. Vercel dashboard → **Storage** → **Create Database** → **Neon Postgres**
+2. Neon auto-sets `DATABASE_URL` in your project environment
+3. Redeploy — `prisma migrate deploy` runs automatically during the build and creates all tables
+
+**Corepack (Yarn 4):** add `ENABLE_EXPERIMENTAL_COREPACK=1` as an environment variable in Vercel so it uses Yarn 4 instead of the default Yarn 1.
+
+---
+
 ## Project structure
 
 ```
@@ -231,6 +260,7 @@ cloover/
 ├── Dockerfile                    # Multi-stage: deps → builder → runner
 ├── docker-compose.yml
 ├── docker-entrypoint.sh          # migrate deploy → seed → start server
+├── vercel.json                   # Vercel monorepo build config
 └── .env.example                  # Root-level example (Docker)
 ```
 
@@ -313,7 +343,7 @@ yarn test:e2e:report
 
 ## Design decisions & trade-offs
 
-**SQLite over Postgres** — Zero infrastructure overhead for local dev and the challenge scope. The Prisma schema switches to Postgres by changing one line (`provider = "postgresql"`) and updating `DATABASE_URL`. No application code changes required.
+**SQLite locally, PostgreSQL in production** — SQLite requires zero infrastructure for local dev. The production deployment on Vercel uses Neon (serverless Postgres) — SQLite's ephemeral `/tmp` filesystem on serverless is incompatible with persistent data. Switching providers required only changing `provider = "postgresql"` in `schema.prisma` and updating the migration SQL; no application code changed.
 
 **Pages Router over App Router** — Avoids the complexity of Server Components and async layouts while satisfying the "no server components" requirement. All data fetching is explicit (`useEffect` / `fetch`), making the data flow easy to follow and test.
 
@@ -332,8 +362,7 @@ yarn test:e2e:report
 ## What I'd add next
 
 1. **Refresh tokens / session revocation** — a `RefreshToken` table with rotation; the current stolen-JWT window is 7 days.
-2. **Postgres in production** — swap the Prisma provider, add PgBouncer, use Cloud SQL.
-3. **CI/CD pipeline** — GitHub Actions: `lint → typecheck → test → build → push image → deploy to Cloud Run`.
+2. **CI/CD pipeline** — GitHub Actions: `lint → typecheck → test → build → deploy to Vercel`.
 4. **Amortisation schedule view** — month-by-month breakdown (payment / principal / interest / balance) expandable on the quote detail page.
 5. **OpenAPI docs** — auto-generate from Zod schemas via `zod-to-openapi` + Swagger UI at `/api/docs`.
 6. **Rate limiting** — token-bucket on auth endpoints (register, login) to prevent brute-force.
