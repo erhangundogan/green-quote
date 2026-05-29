@@ -1,5 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const baseURL = process.env['PLAYWRIGHT_BASE_URL'] ?? 'http://localhost:3000';
+const isRemote = !baseURL.startsWith('http://localhost');
+
 export default defineConfig({
   testDir: './src/tests/e2e',
   fullyParallel: false,
@@ -8,7 +11,7 @@ export default defineConfig({
   workers: process.env['CI'] ? 1 : 4,
   reporter: 'html',
   use: {
-    baseURL: process.env['PLAYWRIGHT_BASE_URL'] ?? 'http://localhost:3000',
+    baseURL,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
@@ -18,10 +21,17 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  webServer: {
-    command: 'yarn dev',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env['CI'],
-    timeout: 120_000,
-  },
+  // Skip the local dev server when running against a remote URL (e.g. Vercel).
+  // Set PLAYWRIGHT_BASE_URL=https://green-quote-gray.vercel.app to run E2E
+  // against the deployed app without needing a local database.
+  ...(isRemote
+    ? {}
+    : {
+        webServer: {
+          command: 'yarn dev',
+          url: 'http://localhost:3000',
+          reuseExistingServer: !process.env['CI'],
+          timeout: 120_000,
+        },
+      }),
 });

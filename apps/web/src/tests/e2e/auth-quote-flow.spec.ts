@@ -27,7 +27,7 @@ test.describe('Auth + Quote flow', () => {
     await page.goto('/register');
     await page.getByLabel('Full name').fill(TEST_USER.fullName);
     await page.getByLabel('Email').fill(TEST_USER.email);
-    await page.getByLabel('Password').fill(TEST_USER.password);
+    await page.getByLabel('Password', { exact: true }).fill(TEST_USER.password);
     await page.getByRole('button', { name: /create account/i }).click();
 
     await expect(page).toHaveURL('/quotes');
@@ -56,7 +56,7 @@ test.describe('Auth + Quote flow', () => {
   test('login → view existing quotes via Quotes menu', async ({ page }) => {
     await page.goto('/login');
     await page.getByLabel('Email').fill('user@test.com');
-    await page.getByLabel('Password').fill('User1234!');
+    await page.getByLabel('Password', { exact: true }).fill('User1234!');
     await signInBtn(page).click();
 
     await expect(page).toHaveURL('/quotes');
@@ -72,7 +72,7 @@ test.describe('Auth + Quote flow', () => {
     // USER — no All Quotes in menu
     await page.goto('/login');
     await page.getByLabel('Email').fill('user@test.com');
-    await page.getByLabel('Password').fill('User1234!');
+    await page.getByLabel('Password', { exact: true }).fill('User1234!');
     await signInBtn(page).click();
     await expect(page).toHaveURL('/quotes');
 
@@ -83,7 +83,7 @@ test.describe('Auth + Quote flow', () => {
     // ADMIN — All Quotes present in menu
     await page.goto('/login');
     await page.getByLabel('Email').fill('admin@test.com');
-    await page.getByLabel('Password').fill('Admin1234!');
+    await page.getByLabel('Password', { exact: true }).fill('Admin1234!');
     await signInBtn(page).click();
     await expect(page).toHaveURL('/quotes');
 
@@ -94,7 +94,7 @@ test.describe('Auth + Quote flow', () => {
   test('non-admin cannot access /admin/quotes', async ({ page }) => {
     await page.goto('/login');
     await page.getByLabel('Email').fill('user@test.com');
-    await page.getByLabel('Password').fill('User1234!');
+    await page.getByLabel('Password', { exact: true }).fill('User1234!');
     await signInBtn(page).click();
     await expect(page).toHaveURL('/quotes');
 
@@ -105,7 +105,7 @@ test.describe('Auth + Quote flow', () => {
   test('admin can reach /admin/quotes via the Quotes nav menu', async ({ page }) => {
     await page.goto('/login');
     await page.getByLabel('Email').fill('admin@test.com');
-    await page.getByLabel('Password').fill('Admin1234!');
+    await page.getByLabel('Password', { exact: true }).fill('Admin1234!');
     await signInBtn(page).click();
     await expect(page).toHaveURL('/quotes');
 
@@ -118,7 +118,7 @@ test.describe('Auth + Quote flow', () => {
   test('All Quotes table supports column sorting', async ({ page }) => {
     await page.goto('/login');
     await page.getByLabel('Email').fill('admin@test.com');
-    await page.getByLabel('Password').fill('Admin1234!');
+    await page.getByLabel('Password', { exact: true }).fill('Admin1234!');
     await signInBtn(page).click();
     await expect(page).toHaveURL('/quotes');
     await page.goto('/admin/quotes');
@@ -149,7 +149,7 @@ test.describe('Auth + Quote flow', () => {
   test('admin can access /admin/quotes and filter', async ({ page }) => {
     await page.goto('/login');
     await page.getByLabel('Email').fill('admin@test.com');
-    await page.getByLabel('Password').fill('Admin1234!');
+    await page.getByLabel('Password', { exact: true }).fill('Admin1234!');
     await signInBtn(page).click();
     await expect(page).toHaveURL('/quotes');
 
