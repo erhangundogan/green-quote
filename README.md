@@ -77,7 +77,7 @@ Solar financing pre-qualification platform. Authenticated users submit details a
 
 | Tool        | Version   | Install                          |
 |-------------|-----------|----------------------------------|
-| Node.js     | ≥ 20      | [nodejs.org](https://nodejs.org) |
+| Node.js     | ≥ 22      | [nodejs.org](https://nodejs.org) |
 | Yarn        | 4.x       | `corepack enable`                |
 | Docker      | optional  | for containerised runs           |
 

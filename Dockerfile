@@ -1,4 +1,4 @@
-FROM node:20-alpine AS base
+FROM node:22-alpine AS base
 # openssl is required by the Prisma query engine at generation time (builder)
 # and at runtime (runner). Alpine ships OpenSSL 3.x; Prisma binaryTargets must match.
 RUN apk add --no-cache openssl
