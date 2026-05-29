@@ -29,9 +29,6 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
-# Pre-create the data directory with correct ownership so the nextjs user
-# can create the SQLite database file when the volume is first mounted.
-RUN mkdir -p /data && chown nextjs:nodejs /data
 
 # Static assets & standalone server bundle
 COPY --from=builder /app/apps/web/public ./apps/web/public
@@ -51,8 +48,6 @@ COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 # Startup entrypoint: runs migrations then starts the Next.js server
 COPY docker-entrypoint.sh ./
 RUN chmod +x docker-entrypoint.sh
-
-VOLUME ["/data"]
 
 USER nextjs
 EXPOSE 3000

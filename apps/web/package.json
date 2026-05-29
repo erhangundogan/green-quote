@@ -12,11 +12,11 @@
     "test:e2e": "PLAYWRIGHT_BASE_URL=https://green-quote-gray.vercel.app playwright test",
     "test:e2e:ui": "PLAYWRIGHT_BASE_URL=https://green-quote-gray.vercel.app playwright test --ui",
     "test:e2e:report": "playwright show-report",
-    "lint": "eslint src --ext .ts,.tsx --max-warnings 0",
+    "lint": "next lint --max-warnings 0",
     "typecheck": "tsc --noEmit",
     "db:migrate": "prisma migrate dev",
     "db:migrate:prod": "prisma migrate deploy",
-    "db:seed": "ts-node --project tsconfig.seed.json prisma/seed.ts",
+    "db:seed": "node prisma/seed.js",
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset --force"
   },
@@ -47,7 +47,7 @@
     "zod": "^3.23.8"
   },
   "prisma": {
-    "seed": "ts-node --project tsconfig.seed.json prisma/seed.ts"
+    "seed": "node prisma/seed.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.45.3",
