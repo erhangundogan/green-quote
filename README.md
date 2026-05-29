@@ -87,16 +87,26 @@ Solar financing pre-qualification platform. Authenticated users submit details a
 
 The image uses a multi-stage build (deps → builder → runner). On first start the entrypoint automatically runs `prisma migrate deploy` then seeds the database (admin + test user) if it is empty.
 
+`docker-compose.yml` includes a local PostgreSQL 16 service — no Neon account or `.env` file required to run locally.
+
 ```bash
-# 1. Set a real JWT_SECRET in docker-compose.yml (or pass via environment)
-# 2. Build and start
+# Zero-config local run — uses the bundled PostgreSQL container:
 docker compose up --build
 
 # App available at http://localhost:3000
-# Data persisted in Docker volume: sqlite_data
+# Data persisted in Docker volume: postgres_data
+# DATABASE_URL defaults to: postgresql://greenquote:greenquote@db:5432/greenquote
 ```
 
-**Architecture (Apple Silicon):** the image is pinned to `linux/arm64` in `docker-compose.yml`. For amd64 deployment (Cloud Run, CI) change `platform` to `linux/amd64` or remove it — the `linux-musl-openssl-3.0.x` Prisma binary is included for both architectures.
+To use a different database (e.g. Neon), create a `.env` file at the repo root:
+
+```bash
+# .env  (gitignored — never commit this file)
+DATABASE_URL=postgresql://user:password@host/dbname?sslmode=require
+JWT_SECRET=your-strong-random-secret
+```
+
+See `.env.example` for a full template.
 
 ---
 
@@ -136,7 +146,7 @@ All variables live in `apps/web/.env` (copy from `apps/web/.env.example`).
 
 | Variable              | Required | Default              | Description                              |
 |-----------------------|----------|----------------------|------------------------------------------|
-| `DATABASE_URL`        | yes      | `file:./dev.db`      | Prisma connection string                 |
+| `DATABASE_URL`        | yes      | —                    | PostgreSQL connection string             |
 | `JWT_SECRET`          | yes      | —                    | ≥ 32-char random secret for JWT signing  |
 | `JWT_EXPIRES_IN`      | no       | `7d`                 | JWT lifetime                             |
 | `NEXT_PUBLIC_APP_URL` | no       | `http://localhost:3000` | Public base URL                       |
